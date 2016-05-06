@@ -1,0 +1,113 @@
+[FORMAT "WCOFF"]
+[INSTRSET "i486p"]
+[OPTIMIZE 1]
+[OPTION 1]
+[BITS 32]
+	EXTERN	_init_gdtidt
+	EXTERN	_init_pic
+	EXTERN	_io_sti
+	EXTERN	_init_palette
+	EXTERN	_init_screen8
+	EXTERN	_putfonts8_asc
+	EXTERN	_init_mouse_cursor8
+	EXTERN	_putblock8_8
+	EXTERN	_sprintf
+	EXTERN	_io_out8
+	EXTERN	_io_hlt
+[FILE "bootpack.c"]
+[SECTION .data]
+LC0:
+	DB	"ToyOS.",0x00
+LC1:
+	DB	"scrnx = %d",0x00
+LC2:
+	DB	"scrny = %d",0x00
+[SECTION .text]
+	GLOBAL	_HariMain
+_HariMain:
+	PUSH	EBP
+	MOV	EBP,ESP
+	PUSH	EBX
+	SUB	ESP,304
+	LEA	EBX,DWORD [-308+EBP]
+	CALL	_init_gdtidt
+	CALL	_init_pic
+	CALL	_io_sti
+	CALL	_init_palette
+	MOVSX	EAX,WORD [4086]
+	PUSH	EAX
+	MOVSX	EAX,WORD [4084]
+	PUSH	EAX
+	PUSH	DWORD [4088]
+	CALL	_init_screen8
+	PUSH	LC0
+	PUSH	0
+	PUSH	9
+	PUSH	9
+	MOVSX	EAX,WORD [4084]
+	PUSH	EAX
+	PUSH	DWORD [4088]
+	CALL	_putfonts8_asc
+	ADD	ESP,36
+	PUSH	LC0
+	PUSH	7
+	PUSH	8
+	PUSH	8
+	MOVSX	EAX,WORD [4084]
+	PUSH	EAX
+	PUSH	DWORD [4088]
+	CALL	_putfonts8_asc
+	PUSH	14
+	PUSH	EBX
+	CALL	_init_mouse_cursor8
+	ADD	ESP,32
+	PUSH	16
+	PUSH	EBX
+	LEA	EBX,DWORD [-52+EBP]
+	PUSH	100
+	PUSH	160
+	PUSH	16
+	PUSH	16
+	MOVSX	EAX,WORD [4084]
+	PUSH	EAX
+	PUSH	DWORD [4088]
+	CALL	_putblock8_8
+	ADD	ESP,32
+	MOVSX	EAX,WORD [4084]
+	PUSH	EAX
+	PUSH	LC1
+	PUSH	EBX
+	CALL	_sprintf
+	PUSH	EBX
+	PUSH	7
+	PUSH	64
+	PUSH	16
+	MOVSX	EAX,WORD [4084]
+	PUSH	EAX
+	PUSH	DWORD [4088]
+	CALL	_putfonts8_asc
+	ADD	ESP,36
+	MOVSX	EAX,WORD [4086]
+	PUSH	EAX
+	PUSH	LC2
+	PUSH	EBX
+	CALL	_sprintf
+	PUSH	EBX
+	PUSH	7
+	PUSH	80
+	PUSH	16
+	MOVSX	EAX,WORD [4084]
+	PUSH	EAX
+	PUSH	DWORD [4088]
+	CALL	_putfonts8_asc
+	ADD	ESP,36
+	PUSH	249
+	PUSH	33
+	CALL	_io_out8
+	PUSH	239
+	PUSH	161
+	CALL	_io_out8
+	ADD	ESP,16
+L5:
+	CALL	_io_hlt
+	JMP	L5
